@@ -1,0 +1,66 @@
+import threading
+import socket
+
+class recvSocketThread (threading.Thread):
+    def __init__(self, menu, sock):
+        self.sock = sock
+        self.conn = (None, None)
+        self.data_lock = data_lock
+        threading.Thread.__init__(self)
+        self.menu = menu
+
+    # new_socket: Accepts a new client connection. If the socket is shutdown while accepting
+    #             the socket will error and we clean up the socket and stop the thread.
+    def new_socket(self):
+        try:
+            self.conn = self.sock.accept()
+            return True
+
+        except socket.error, (code,message):
+            return False
+
+    # close_socket: Checks whether a connection has been opened, and closes it if it has.
+    def close_socket(self):
+        if self.sock != None:
+            self.sock.close()
+        if self.conn[0] != None:
+            self.conn[0].close()
+
+    # run: The main socket loop. Receives packets of Unicode text starting with
+    #      the size of the packet as a 4 byte integer. Followed by a JSON string
+    #      with { (Mail box name): [Array of mail messages with parameters (address, body, date)]}
+    def run(self): 
+        # Accept connections indefinately until the UI is closed.
+        try:
+            while 1:
+                # If UI closes thread while blocking for accept.
+                if self.new_socket() != True:
+                    self.close_socket()
+                    return
+                
+                # Get the length of the packet.
+                total_received = 0
+                result = ""
+                
+                while total_received < PACKET_HEADER_LEN:
+                    received = self.conn[0].recv(1024)
+                    if not received: 
+                        break
+                    result += received
+                    total_received += len(received)
+
+                packet_length = int(result[0:PACKET_HEADER_LEN])
+
+                # Receive the entire packet.
+                while (total_received - PACKET_HEADER_LEN) < packet_length:
+                    received = self.conn[0].recv(1024)
+                    if not received: break
+                    total_received += len(received)
+                    result += received
+
+                # Whole packet has been received at this point, so do something with it!
+                self.menu.direct_to_mail_box(result[PACKET_HEADER_LEN:])
+
+        except socket.error, (socde,message):
+            self.close_socket()
+            return
