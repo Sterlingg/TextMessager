@@ -13,7 +13,7 @@ import sockthr
 
 class MyApp(object):    
 
-    def __init__(self, stdscreen):                                           
+    def __init__(self, stdscreen):
         self.screen = stdscreen
         curses.curs_set(0)
         curses.cbreak()
@@ -23,15 +23,16 @@ class MyApp(object):
         # Set the locale to the default locale, so that curses will accept unicode characters.
         locale.setlocale(locale.LC_ALL,"")
         
-        main_menu = menu.Menu(self.screen)
-        
         sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         sock.bind(('0.0.0.0',9002))
         sock.listen(5)
         data_lock = threading.Lock()
 
-        sockThread = sockthr.socketThread(main_menu,sock,data_lock)
+        main_menu = menu.Menu(self.screen)
+
+        sockThread = sockthr.socketThread(main_menu, sock, data_lock)
         sockThread.start()
+
         main_menu.display()
 
         # Shutdown all further reads, which will also stop our socket from accepting anymore connections, and cause it to

@@ -1,28 +1,35 @@
 import curses
-import json
-import math
-import locale
-import random
-import sys
 import datetime
+import json
+import locale
+import math
+import random
+import socket
+import sys
+
 from curses import panel, textpad
 
 # Menu: Base class for all menus in the UI.
 class Menu(object):
 
     def __init__(self, stdscreen):
+        """
+        stdscreen is the default screen.
+        """
         self.MAX_YX = stdscreen.getmaxyx()
 
         self.stdscreen = stdscreen
         self.window = stdscreen.subwin(0, 0)
-        
+
         curses.init_pair(1, curses.COLOR_GREEN , curses.COLOR_MAGENTA)
         self.update_pairs(curses.COLOR_MAGENTA)
         self.window.bkgdset(' ', curses.color_pair(1))
 
         self.mail_win = self.window.subwin(6, 1)
 
-        self.panel = panel.new_panel(self.window)                            
+        self.panel = panel.new_panel(self.window)
+
+        self.device_id = ""
 
         self.mail_boxes = {'Inbox': {'Content': None, 'Size': 0},
                            'Received': {'Content': None, 'Size': 0}, 
@@ -46,13 +53,26 @@ class Menu(object):
             ('Received', lambda: self.get_messages(self.mail_boxes['Received'])),
             ('Outbox', lambda: self.get_messages(self.mail_boxes['Outbox'])),
             ('Send Message', lambda: self.send_message()),
+            ('Set Device Id.', lambda: self.set_device_id()),
+            ('Get Device Id.', lambda: self.get_device_id()),
+            ('Connect', lambda: self.connect_phone()),
             ('Randomize BG!', self.randomize_bg)
-            ]        
+            ]   
 
         self.items.append(('exit', 'exit'))
 
-    def add_str_to_pad(self, win, s_to_add, start_line, y_x_sz):
+    def add_str_to_win(self, win, s_to_add, start_line, y_x_sz):
         """
+        Adds a string to the window line by line, and also colourizes each
+        line in a random way. :)
+        
+        win - The window that the string is being written to.
+        s_to_add - The string being added to this window.
+        start_line - The first line that the string is being written
+        to in this window.
+        y_x_sz - A tuple containing the top left corner y position of this 
+        window, the top left corner x position of this window, and the 
+        maximum length of each line of text in this window.
         """
         i = start_line
         code = locale.getpreferredencoding()
@@ -74,7 +94,17 @@ class Menu(object):
                 break
         return i - start_line
 
+    def connect_phone(self):
+        """
+        Initiates a socket connection to the phone.
+        """
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.connect(('192.168.1.114', 9003))
+
     def count_lines(self, s, y_x_sz):
+        """
+        Counts the number of lines 
+        """
         i = 1
         while len(s) > 0:
             if i < (self.MAX_YX[0] - y_x_sz[0]):
@@ -110,13 +140,20 @@ class Menu(object):
         formatted = datetime.datetime.fromtimestamp(int(time_stamp) / 1000).strftime('%Y-%m-%d %H:%M:%S')
         return formatted
 
+    def get_device_id(self):
+        """
+        Retrieves the device id and prints it to the screen from the 
+        currently stored id.
+        """
+        self.add_str_to_win(self.mail_win, self.device_id, 4, self.col_yxsize['Date'])
+        
     def get_line_count(self, mail):
         """
         """  
-        date_num_lines = self.add_str_to_pad(self.mail_win, self.format_timestamp(mail['date']), line, self.col_yxsize['Date'])
-        addr_num_lines = self.add_str_to_pad(self.mail_win, mail['address'], 
+        date_num_lines = self.add_str_to_win(self.mail_win, self.format_timestamp(mail['date']), line, self.col_yxsize['Date'])
+        addr_num_lines = self.add_str_to_win(self.mail_win, mail['address'], 
                                              line, self.col_yxsize['Address'])
-        body_num_lines = self.add_str_to_pad(self.mail_win, mail['body'], 
+        body_num_lines = self.add_str_to_win(self.mail_win, mail['body'], 
                                              line, self.col_yxsize['Body'])
         line += (max(date_num_lines, addr_num_lines, body_num_lines) + 1)
 
@@ -155,20 +192,20 @@ class Menu(object):
     def parse_mail_box(self, mail_box, start):
         self.set_up_col_names()
 
-        line_num = 3
+        line_num = 5
         if mail_box['Content'] != None:
             for mail in mail_box['Content'][start:]:
-                date_num_lines = self.add_str_to_pad(self.mail_win, 
+                date_num_lines = self.add_str_to_win(self.mail_win, 
                                                      self.format_timestamp(mail['date']), 
                                                      line_num, self.col_yxsize['Date'])
-                addr_num_lines = self.add_str_to_pad(self.mail_win, 
+                addr_num_lines = self.add_str_to_win(self.mail_win, 
                                                      mail['address'], line_num, 
                                                      self.col_yxsize['Address'])
-                body_num_lines = self.add_str_to_pad(self.mail_win, mail['body'], line_num,
+                body_num_lines = self.add_str_to_win(self.mail_win, mail['body'], line_num,
                                                      self.col_yxsize['Body'])
                 line_num += (max(date_num_lines, addr_num_lines, body_num_lines) + 1)
         else:
-            self.add_str_to_pad(self.mail_win, 'No messages.', line_num, self.col_yxsize['Date'])
+            self.add_str_to_win(self.mail_win, 'No messages.', line_num, self.col_yxsize['Date'])
 
         self.mail_win.refresh()
 
@@ -187,7 +224,7 @@ class Menu(object):
         """
         """
 
-        num_window = curses.newwin(1, 11, 8, 5)
+        num_window = curses.newwin(1, 16, 8, 5)
         text_window = curses.newwin(4, 40, 10, 5)
 
         self.mail_win.addstr(1, 0, "Enter Phone Number",
@@ -200,18 +237,38 @@ class Menu(object):
         num_tb = curses.textpad.Textbox(num_window, insert_mode = True)
         body_tb = curses.textpad.Textbox(text_window, insert_mode = True)
 
-        text = num_tb.edit()
-        text = body_tb.edit()
+        phone_num_text = num_tb.edit()
+        body_text = body_tb.edit()
 
         # Remove all of the newlines.
-        for i in range(40, len(text), 40):
-            text = text[0:i] + '' + text[i+1:]
+        for i in range(40, len(body_text), 40):
+            body_text = body_text[0:i] + '' + body_text[i+1:]
         
         self.mail_win.clear()
-        self.add_str_to_pad(self.mail_win, text, 2, [3, 0, 80])
+        self.add_str_to_win(self.mail_win, body_text, 2, [3, 0, 80])
 
         self.mail_win.refresh()
-        return text
+
+        json_num_body_str = json.dumps({"PhoneNumber": phone_num_text, "Body": body_text})
+
+        try:        
+            self.sock.sendall(str(len(json_num_body_str)).zfill(8) + json_num_body_str)
+
+        except socket.error, (socde,message):
+            print ":(" + message
+
+        return phone_num_text
+
+    def set_device_id(self):
+        """
+        Sets up the menu item that allows the user to input the device id of the 
+        phone they're connecting.
+        """
+        device_window = curses.newwin(1, 9, 8, 5)
+        device_tb = curses.textpad.Textbox(device_window, insert_mode = True)
+        device_id_text = device_tb.edit()
+        
+        self.device_id = device_id_text 
 
     def set_mail_lines(self, mail_box):
         total_lines = 0
@@ -229,9 +286,10 @@ class Menu(object):
                 self.mail_boxes['Inbox']['Size'] = total_lines
 
     def set_up_col_names(self):
-        self.add_str_to_pad(self.mail_win, 'DATE', 1, self.col_yxsize['Date'])
-        self.add_str_to_pad(self.mail_win, 'FROM', 1, self.col_yxsize['Address'])
-        self.add_str_to_pad(self.mail_win, 'THE BAWDDDYY LOOOoooK', 1, self.col_yxsize['Body'])
+        COL_NAME_START_Y = 4
+        self.add_str_to_win(self.mail_win, 'DATE', COL_NAME_START_Y, self.col_yxsize['Date'])
+        self.add_str_to_win(self.mail_win, 'FROM', COL_NAME_START_Y, self.col_yxsize['Address'])
+        self.add_str_to_win(self.mail_win, 'THE BAWDDDYY LOOOoooK', COL_NAME_START_Y, self.col_yxsize['Body'])
 
     def set_col_sizes(self, date_size, addr_size):
         """
@@ -243,7 +301,6 @@ class Menu(object):
         self.col_yxsize['Date'] = [6, 0, date_size]
         self.col_yxsize['Address'] = [6, date_size + 2, addr_size]
         self.col_yxsize['Body'] = [6, date_size + addr_size + 4, self.MAX_YX[1] - (date_size + addr_size) - 5]
-        
     
     def update_pad(self, mail_box):
         """

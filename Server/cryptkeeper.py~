@@ -1,0 +1,18 @@
+from Crypto.Cipher import AES
+import base64
+import socket
+
+TEST_KEY = '768EE18AB6480D53CC8FFCD23D117D57'
+TEST_IV = 'C111510372A7A003'
+
+#TODO: Stuff
+class CryptKeeper(object):
+    """
+    """
+    def __init__(self, key = TEST_KEY, iv = TEST_IV):
+        """
+        """
+        self.key = key
+        self.iv = iv
+
+

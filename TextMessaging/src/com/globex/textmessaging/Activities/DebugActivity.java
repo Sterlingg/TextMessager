@@ -1,6 +1,7 @@
 package com.globex.textmessaging.Activities;
 
 import transport.SendTask;
+import transport.SockReceiveThread;
 import transport.NetInfo;
 import transport.Packetizer;
 import android.app.Activity;
@@ -29,13 +30,15 @@ public class DebugActivity extends Activity {
 
         String toSend = Packetizer.packetize(messages);
  
-        ((EditText)findViewById(R.id.ip_field1)).setText("10.0.2.2");
+        ((EditText)findViewById(R.id.ip_field1)).setText("192.168.1.144");
         
         NetInfo.setIp(((EditText)findViewById(R.id.ip_field1)).getText().toString());
         
         (new SendTask()).execute(toSend
         		,NetInfo.getIp()
         		,String.valueOf(NetInfo.getPort())); 
+        Thread thr = new Thread(new SockReceiveThread());
+        thr.start();
     }
 	
     @Override

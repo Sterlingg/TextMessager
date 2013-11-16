@@ -1,0 +1,19 @@
+from Crypto.Cipher import AES
+import 
+
+#encrypt: Encrypts a string with 128 bit AES-CBC.
+def encrypt(to_encrypt):
+    # TODO: Add initialization vector.
+    obj = AES.new('768EE18AB6480D53CC8FFCD23D117D57',AES.MODE_CBC,IV = "C111510372A7A003")
+    BLOCK_SIZE = 16
+    PADDING = ' '
+    pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * PADDING
+    to_encrypt = pad(to_encrypt)
+    cipher = obj.encrypt(to_encrypt)
+    return cipher
+
+#decrypt: Decrypts a string with 128 bit AES-CBC.
+def decrypt(to_decrypt):
+    # TODO: Add initialization vector.
+    obj = AES.new('768EE18AB6480D53CC8FFCD23D117D57',AES.MODE_CBC,IV = "C111510372A7A003")
+    return obj.decrypt(to_decrypt)

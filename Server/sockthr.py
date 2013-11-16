@@ -9,12 +9,24 @@ import json
 
 PACKET_HEADER_LEN = 8
 class socketThread (threading.Thread):
-    def __init__(self, menu,sock,data_lock):
+    def __init__(self, menu, sock, data_lock):
         self.sock = sock
-        self.conn = (None, None)
+        self.conn = None
         self.data_lock = data_lock
         threading.Thread.__init__(self)
         self.menu = menu
+
+    # close_socket: Checks whether a connection has been opened, and closes it if it has.
+    def close_socket(self):
+        if self.sock != None:
+            self.sock.close()
+        if self.conn[0] != None:
+            self.conn[0].close()
+
+    def get_curr_sock(self):
+        """
+        """
+        return self.sock
 
     # new_socket: Accepts a new client connection. If the socket is shutdown while accepting
     #             the socket will error and we clean up the socket and stop the thread.
@@ -25,13 +37,6 @@ class socketThread (threading.Thread):
 
         except socket.error, (code,message):
             return False
-
-    # close_socket: Checks whether a connection has been opened, and closes it if it has.
-    def close_socket(self):
-        if self.sock != None:
-            self.sock.close()
-        if self.conn[0] != None:
-            self.conn[0].close()
 
     # run: The main socket loop. Receives packets of Unicode text starting with
     #      the size of the packet as a 4 byte integer. Followed by a JSON string

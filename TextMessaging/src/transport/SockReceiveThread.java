@@ -1,20 +1,31 @@
 package transport;
 
 import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 import org.json.JSONObject;
 
-import android.os.AsyncTask;
+import com.globex.textmessaging.SMS.SMSSender;
 
-public class SockReceiveThread extends AsyncTask<Void, JSONObject, Void> {
+import android.os.AsyncTask;
+import android.util.Log;
+
+public class SockReceiveThread implements Runnable {
+	Socket sock;
+	DataInputStream dis;
+	ServerSocket ss; 
 
 	@Override
-	protected Void doInBackground(Void... params) {
-		try {
-			Socket sock = new Socket("127.0.0.1", 9002);
+	public void run() {
+		SMSSender sender = new SMSSender();
 
-			DataInputStream dis = new DataInputStream(
+		try {
+			ss = new ServerSocket(9003);
+			sock = ss.accept();
+			Log.d("Received Data", "Accepted?");
+			dis = new DataInputStream(
 					sock.getInputStream());
 			while(true){
 				byte[] packetLenBuf= new byte[8];
@@ -27,24 +38,17 @@ public class SockReceiveThread extends AsyncTask<Void, JSONObject, Void> {
 				if (len > 0) {
 					dis.readFully(data);
 				}
-				else
-					break;
-
-				publishProgress(new JSONObject(new String(data)));   
+				Log.d("Received Data", "Publishing progress");
+				Log.d("Received Data", new String(data));
+				sender.sendMessage(new JSONObject(new String(data)));				
 			}
-			dis.close();
-			sock.close();
+			//dis.close();
+			//sock.close();
 		} catch (Exception e) {
+			Log.d("Received Data", "Catched you.");
 			e.printStackTrace();
 		}
-
-		return null;
-	}
-
-
-	@Override
-	protected void onProgressUpdate(JSONObject ... values) {
-
+		
 	}
 
 }
