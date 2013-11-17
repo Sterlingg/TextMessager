@@ -24,14 +24,16 @@ class MyApp(object):
         locale.setlocale(locale.LC_ALL,"")
         
         sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        sock.bind(('0.0.0.0',9002))
+        sock.bind(('0.0.0.0',9001))
         sock.listen(5)
         data_lock = threading.Lock()
 
         main_menu = menu.Menu(self.screen)
 
         sockThread = sockthr.socketThread(main_menu, sock, data_lock)
-        sockThread.start()
+#        sockThread.start()
+
+        main_menu.set_sock_thread(sockThread)
 
         main_menu.display()
 

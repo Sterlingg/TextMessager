@@ -65,5 +65,4 @@ public class SMSReceiver extends BroadcastReceiver {
 		}
 		return real_messages;
 	}	
-
 }

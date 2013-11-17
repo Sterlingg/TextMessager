@@ -1,3 +1,4 @@
+import base64
 import threading
 import socket
 import sys
@@ -15,6 +16,7 @@ class socketThread (threading.Thread):
         self.data_lock = data_lock
         threading.Thread.__init__(self)
         self.menu = menu
+        self.crypt_keeper = None
 
     # close_socket: Checks whether a connection has been opened, and closes it if it has.
     def close_socket(self):
@@ -71,8 +73,14 @@ class socketThread (threading.Thread):
                     result += received
 
                 # Whole packet has been received at this point, so do something with it!
-                self.menu.direct_to_mail_box(result[PACKET_HEADER_LEN:])
+                self.menu.direct_to_mail_box(
+                    self.crypt_keeper.decrypt(base64.b64decode(result[PACKET_HEADER_LEN:])))
 
         except socket.error, (socde,message):
             self.close_socket()
             return
+
+    def set_crypt(self, crypt_keeper):
+        """
+        """
+        self.crypt_keeper = crypt_keeper

@@ -6,6 +6,9 @@ import math
 import random
 import socket
 import sys
+import base64
+
+import cryptkeeper
 
 from curses import panel, textpad
 
@@ -29,7 +32,9 @@ class Menu(object):
 
         self.panel = panel.new_panel(self.window)
 
+        self.sockthr = None
         self.device_id = ""
+        self.crypt_keeper = None
 
         self.mail_boxes = {'Inbox': {'Content': None, 'Size': 0},
                            'Received': {'Content': None, 'Size': 0}, 
@@ -99,7 +104,7 @@ class Menu(object):
         Initiates a socket connection to the phone.
         """
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect(('192.168.1.114', 9003))
+        self.sock.connect(('localhost', 5050))
 
     def count_lines(self, s, y_x_sz):
         """
@@ -250,9 +255,9 @@ class Menu(object):
         self.mail_win.refresh()
 
         json_num_body_str = json.dumps({"PhoneNumber": phone_num_text, "Body": body_text})
-
+        encrypted_str = base64.b64encode(self.crypt_keeper.encrypt(json_num_body_str))
         try:        
-            self.sock.sendall(str(len(json_num_body_str)).zfill(8) + json_num_body_str)
+            self.sock.sendall(str(len(encrypted_str)).zfill(8) + encrypted_str)
 
         except socket.error, (socde,message):
             print ":(" + message
@@ -264,12 +269,16 @@ class Menu(object):
         Sets up the menu item that allows the user to input the device id of the 
         phone they're connecting.
         """
-        device_window = curses.newwin(1, 9, 8, 5)
+        device_window = curses.newwin(1, 37, 8, 5)
         device_tb = curses.textpad.Textbox(device_window, insert_mode = True)
         device_id_text = device_tb.edit()
         
-        self.device_id = device_id_text 
+        self.device_id = device_id_text[:len(device_id_text) - 1]
 
+        self.crypt_keeper = cryptkeeper.security_setup(self.device_id)
+        self.sockthr.set_crypt(self.crypt_keeper)
+        self.sockthr.start()
+        
     def set_mail_lines(self, mail_box):
         total_lines = 0
 
@@ -285,7 +294,14 @@ class Menu(object):
                 total_lines += num_lines
                 self.mail_boxes['Inbox']['Size'] = total_lines
 
+    def set_sock_thread(self, sockthr):
+        """
+        """
+        self.sockthr = sockthr
+        
     def set_up_col_names(self):
+        """
+        """
         COL_NAME_START_Y = 4
         self.add_str_to_win(self.mail_win, 'DATE', COL_NAME_START_Y, self.col_yxsize['Date'])
         self.add_str_to_win(self.mail_win, 'FROM', COL_NAME_START_Y, self.col_yxsize['Address'])

@@ -28,4 +28,13 @@
         android:layout_marginBottom="50dp"
         android:text="@string/send_btn_string" />
 
+    <TextView
+        android:id="@+id/android_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="Medium Text"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
 </RelativeLayout>

@@ -7,6 +7,8 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import crypto.CryptKeeper;
+
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -16,7 +18,7 @@ import android.util.Log;
  */
 public class SendTask extends AsyncTask<String, Void, Void>{
 
-    @Override
+	@Override
     protected void onPostExecute(Void result) {
         super.onPostExecute(result);
     }
@@ -30,7 +32,7 @@ public class SendTask extends AsyncTask<String, Void, Void>{
 			OutputStream os = sock.getOutputStream();
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(os));
             
-            Log.i("ConnectionTask", "Sending" + Packetizer.packetize(params[0]));
+            Log.i("ConnectionTask", "Sending!" + Packetizer.packetize(params[0]));
             out.write(Packetizer.packetize(params[0]));
             
             out.flush();

@@ -6,6 +6,7 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
+import java.util.UUID;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -16,12 +17,18 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import android.app.Activity;
+import android.content.Context;
+import android.telephony.TelephonyManager;
+import android.util.Log;
+
 public class CryptKeeper {
 
-        private Cipher aesCipher;
+        private static CryptKeeper instance = null;
+		private Cipher aesCipher;
         private SecretKeySpec aesKeySpec;
         private IvParameterSpec aesIv;
-        private String shared_secret = "password";
+        private String device_id = "";
         
         private static final String KDF_ALG = "PBKDF2WithHmacSHA1";
         private static final int KDF_ITERATIONS = 1024;
@@ -31,11 +38,14 @@ public class CryptKeeper {
 		private static final String ENCRYPTION_ALG = "AES";
 		private static final String ENCRYPTION_MODE = "CBC";
 		private static final String PADDING = "NoPadding";
-
-        public CryptKeeper() {
-
+		
+        private CryptKeeper(String deviceId) {
          	
-        		pbkdf2Gen(shared_secret.toCharArray());
+        		this.device_id = deviceId;
+        		
+        		pbkdf2Gen(deviceId.toCharArray());
+        		
+        		System.out.println("Device Idd:" + deviceId);
         		
         		System.out.println("Key: " + 
         		Arrays.toString(aesKeySpec.getEncoded()));
@@ -63,32 +73,6 @@ public class CryptKeeper {
 				}          	                
         }
              
-        public CryptKeeper(byte[] key, byte[] iv){ 
-
-            	aesKeySpec = new SecretKeySpec(key, ENCRYPTION_ALG);
-            	aesIv = new IvParameterSpec(iv);  
-            	
-				try {
-					aesCipher = Cipher.getInstance(ENCRYPTION_ALG + "/"
-							+ ENCRYPTION_MODE + "/"
-							+ PADDING);
-		        	aesCipher.init(Cipher.ENCRYPT_MODE, aesKeySpec,
-		        			aesIv);
-				} catch (NoSuchAlgorithmException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchPaddingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvalidKeyException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvalidAlgorithmParameterException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-        }
-        
     	final protected static char[] hexArray = "0123456789abcdef".toCharArray();
     	public static String bytesToHex(byte[] bytes) {
     	    char[] hexChars = new char[bytes.length * 2];
@@ -127,18 +111,22 @@ public class CryptKeeper {
 
 				try {
 					aesCipher.init(Cipher.ENCRYPT_MODE, aesKeySpec, aesIv);
-					encrypted = aesCipher.doFinal(bs);  
+					encrypted = aesCipher.doFinal(bs);
 				} catch (InvalidKeyException e) {
 					// TODO Auto-generated catch block
+					Log.e("CryptKeeper", "Invalid Key" + "Encrypting.");
 					e.printStackTrace();
 				} catch (InvalidAlgorithmParameterException e) {
-					// TODO Auto-generated catch block
+					Log.e("CryptKeeper", "Invalid Key" + "Encrypting.");
+
 					e.printStackTrace();
 				} catch (IllegalBlockSizeException e) {
-					// TODO Auto-generated catch block
+					Log.e("CryptKeeper", "Invalid Key" + "Encrypting.");
+
 					e.printStackTrace();
 				} catch (BadPaddingException e) {
-					// TODO Auto-generated catch block
+					Log.e("CryptKeeper", "Invalid Key" + "Encrypting.");
+
 					e.printStackTrace();
 				}
                         					
@@ -162,6 +150,29 @@ public class CryptKeeper {
                 
                 return iv;
         }
+		
+		public static CryptKeeper getInstance()
+		{
+			if (instance  == null)
+			{
+				//TODO: Real exception here.
+				return null;
+			}
+			return instance;
+		}
+		
+		public static CryptKeeper getInstance(String deviceId) {
+			// TODO Auto-generated method stub
+			if (instance  == null)
+			{
+				instance = new CryptKeeper(deviceId);
+			}
+			return instance;
+		}        
+		
+		public String getDeviceId(){
+			return this.device_id;
+		}
 		
 		public byte[] get_iv(){			
 			return aesIv.getIV();
@@ -217,5 +228,5 @@ public class CryptKeeper {
             }
                                    	
         	return s + padString;
-        }        
+        }
 }

@@ -9,7 +9,7 @@ TEST_IV = 'C111510372A7A003'
 class CryptKeeper(object):
     """
     """
-    def __init__(self, password = "password", salt = "salt", iv = TEST_IV):
+    def __init__(self, password = "ffffffff-9e04-e7aa-ffff-ffff99d603a9", salt = "salt", iv = TEST_IV):
         """
         """
         self.password = password
@@ -19,6 +19,7 @@ class CryptKeeper(object):
         self.iv = iv
 
         print "IV Length = " + str(len(self.iv))
+
         #decrypt: Decrypts a string with 128 bit AES-CBC.
     def decrypt(self, to_decrypt):
         """
@@ -55,10 +56,10 @@ def receive(conn):
                 break
             result += received
             total_received += len(received)
-        
-            packet_length = int(result[0:PACKET_HEADER_LEN])
-        
-                # Receive the entire packet.
+            
+        packet_length = int(result[0:PACKET_HEADER_LEN])
+            
+        # Receive the entire packet.
         while (total_received - PACKET_HEADER_LEN) < packet_length:
             received = conn[0].recv(1024)
             if not received: break
@@ -85,10 +86,9 @@ def send():
 def send(conn, to_send):
     conn[0].sendall(str(len(to_send)).zfill(8) + to_send)
 
-
-def full_init():
+def security_setup(device_id):
     sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-    sock.bind(('0.0.0.0',9005))
+    sock.bind(('0.0.0.0',9006))
     sock.listen(5)
 
     conn = sock.accept()
@@ -97,13 +97,14 @@ def full_init():
     iv = base64.b64decode(receive(conn))
 
     print "Received salt: " + salt + "\nReceived IV: " + iv
-    
-    ck = CryptKeeper("password", salt, iv)
+    print "Device id: " + device_id
+    # emulator_id = (length "ffffffff-9e04-e7aa-ffff-ffff99d603a9")
+    ck = CryptKeeper(device_id, salt, iv)
     
     send(conn, ck.encrypt("Doge!!"))
 
     sock.close()
+    return ck
 
 if __name__ == '__main__':
-
-    full_init()
+    security_setup()

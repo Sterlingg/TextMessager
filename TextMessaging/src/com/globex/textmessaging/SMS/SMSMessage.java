@@ -71,7 +71,5 @@ public class SMSMessage {
 		}
 		
 		return jsonObj;
-	}
-	
-	
+	}	
 }
