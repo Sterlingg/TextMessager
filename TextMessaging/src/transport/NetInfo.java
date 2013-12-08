@@ -10,7 +10,7 @@ public class NetInfo {
 	private static int port = 9001;
 	
 	/**
-	 * @return the ip
+	 * @return the ip.
 	 */
 	public static String getIp() {
 		return ip;
@@ -28,7 +28,7 @@ public class NetInfo {
 		return port;
 	}
 	/**
-	 * @param port the port to set
+	 * @param port the port to set1
 	 */
 	public static void setPort(int port) {
 		NetInfo.port = port;

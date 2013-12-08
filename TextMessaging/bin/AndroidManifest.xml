@@ -14,7 +14,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.SEND_SMS" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:allowBackup="true"
@@ -31,15 +31,28 @@
         <activity
             android:name="com.globex.textmessaging.Activities.SecurityInitActivity"
             android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="com.globex.textmessaging.Activities.DebugActivity"
+            android:label="@string/title_activity_security_init" >
+        </activity>
+        <activity
+            android:name="com.globex.textmessaging.Activities.Step1Activity"
+            android:label="@string/title_activity_step1" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+             >
         </activity>
         <activity
-            android:name="com.globex.textmessaging.Activities.DebugActivity"
-            android:label="@string/title_activity_security_init" >
+            android:name="com.globex.textmessaging.Activities.Step2Activity"
+            android:label="@string/title_activity_step2" >
+        </activity>
+        <activity
+            android:name="com.globex.textmessaging.Activities.Step3Activity"
+            android:label="@string/title_activity_step3" >
         </activity>
     </application>
 

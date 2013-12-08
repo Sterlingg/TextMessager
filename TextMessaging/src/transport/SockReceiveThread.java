@@ -29,9 +29,9 @@ public class SockReceiveThread implements Runnable {
 
 		try {
 			Log.d("SockReceiveThread", "Not accepted.!");
-			ss = new ServerSocket(9003);
+			ss = new ServerSocket(9004);
 			sock = ss.accept();
-			Log.d("SockReceiveThread", "Accepted!!!?!!!@!1!!");
+			Log.d("SockReceiveThread", "Accepted!!!?!!!!@!1!!");
 			dis = new DataInputStream(
 					sock.getInputStream());
 			while(true){
@@ -41,7 +41,7 @@ public class SockReceiveThread implements Runnable {
 
 				int len = Integer.parseInt(new String(packetLenBuf));
 				byte[] b64data = new byte[len];
-												
+											
 				if (len > 0) {
 					dis.readFully(b64data);
 				}

@@ -31,7 +31,7 @@ public class SecurityTask extends AsyncTask<Void, Void, Void> {
 		}
 
 	}
-		
+	//
 	private String getDeviceId(){
 		
         final TelephonyManager tm = (TelephonyManager) 
@@ -53,7 +53,7 @@ public class SecurityTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected Void doInBackground(Void... arg0) {
 		try {
-			CryptKeeper ck = CryptKeeper.getInstance(getDeviceId());
+			CryptKeeper ck = CryptKeeper.getInstance();
 			
 			Socket sock = new Socket("10.0.2.2", 9006);
 
@@ -86,14 +86,16 @@ public class SecurityTask extends AsyncTask<Void, Void, Void> {
 	
 	@Override
 	protected void onPostExecute(Void result) {
-		
+
 		Log.d("SecurityTask", "Finished?????");
 		Toast.makeText(mainContext,"Connection established."
 				,Toast.LENGTH_LONG).show();		
-		        
-		Intent intent = new Intent(mainContext, 
-				DebugActivity.class);
-		
-		mainContext.startActivity(intent);   
-    }
+
+
+		Thread thr = new Thread(new SockReceiveThread());
+		thr.start();
+
+	}
+
+
 }

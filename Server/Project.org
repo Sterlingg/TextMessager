@@ -1,0 +1,21 @@
+* TODO TODO List! [16%]
+** TODO GUI Stuff
+*** TODO Move sending screen to top right.
+*** TODO Remove colours. 
+** TODO Refactoring
+** TODO Documentation
+** TODO Socket Stuff
+*** TODO Close sockets properly.
+*** TODO Use less sockets.
+** TODO Handle terminal resize.
+** DONE Easy setup [2/2]
+   CLOSED: [2013-12-07 Sat 14:55]
+*** DONE Android step by step instructions.
+    CLOSED: [2013-12-07 Sat 14:09]
+- [X] Step 1: Launch Python app.
+- [X] Step 2: Enter password into Python app, and hit C-g.
+- [X] Step 3: Hit connect on Python app.     
+
+*** DONE Python side setup
+    CLOSED: [2013-12-07 Sat 14:09]
+- [X] New screen at beginning that asks for password.

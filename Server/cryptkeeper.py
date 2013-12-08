@@ -86,7 +86,7 @@ def send():
 def send(conn, to_send):
     conn[0].sendall(str(len(to_send)).zfill(8) + to_send)
 
-def security_setup(device_id):
+def security_setup(password):
     sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     sock.bind(('0.0.0.0',9006))
     sock.listen(5)
@@ -97,9 +97,9 @@ def security_setup(device_id):
     iv = base64.b64decode(receive(conn))
 
     print "Received salt: " + salt + "\nReceived IV: " + iv
-    print "Device id: " + device_id
+    print "Password: " + password
     # emulator_id = (length "ffffffff-9e04-e7aa-ffff-ffff99d603a9")
-    ck = CryptKeeper(device_id, salt, iv)
+    ck = CryptKeeper(password, salt, iv)
     
     send(conn, ck.encrypt("Doge!!"))
 

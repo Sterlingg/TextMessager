@@ -15,13 +15,14 @@ from curses import panel, textpad
 # Menu: Base class for all menus in the UI.
 class Menu(object):
 
-    def __init__(self, stdscreen):
+    def __init__(self, stdscreen, password):
         """
         stdscreen is the default screen.
         """
         self.MAX_YX = stdscreen.getmaxyx()
 
         self.stdscreen = stdscreen
+        self.password = password
         self.window = stdscreen.subwin(0, 0)
 
         curses.init_pair(1, curses.COLOR_GREEN , curses.COLOR_MAGENTA)
@@ -32,6 +33,7 @@ class Menu(object):
 
         self.panel = panel.new_panel(self.window)
 
+        self.sock = None
         self.sockthr = None
         self.device_id = ""
         self.crypt_keeper = None
@@ -53,13 +55,11 @@ class Menu(object):
         self.position = 0
 
         self.set_col_sizes(20, 20)
+
         self.items = [
             ('Inbox', lambda: self.get_messages(self.mail_boxes['Inbox'])),
             ('Received', lambda: self.get_messages(self.mail_boxes['Received'])),
-            ('Outbox', lambda: self.get_messages(self.mail_boxes['Outbox'])),
             ('Send Message', lambda: self.send_message()),
-            ('Set Device Id.', lambda: self.set_device_id()),
-            ('Get Device Id.', lambda: self.get_device_id()),
             ('Connect', lambda: self.connect_phone()),
             ('Randomize BG!', self.randomize_bg)
             ]   
@@ -104,11 +104,11 @@ class Menu(object):
         Initiates a socket connection to the phone.
         """
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect(('localhost', 5050))
+        self.sock.connect(('localhost', 5051))
 
     def count_lines(self, s, y_x_sz):
         """
-        Counts the number of lines 
+        Counts the number of rows a string will occupy.
         """
         i = 1
         while len(s) > 0:
@@ -124,6 +124,7 @@ class Menu(object):
 
     # direct_to_mail_box: Parses the JSON data into an array of SMS messages, and passes
     #                     it off to the appropriate mail box.
+    # TODO: YIKES !!
     def direct_to_mail_box(self,messages):
         jsonMessages = json.loads(messages)
         try:
@@ -145,13 +146,6 @@ class Menu(object):
         formatted = datetime.datetime.fromtimestamp(int(time_stamp) / 1000).strftime('%Y-%m-%d %H:%M:%S')
         return formatted
 
-    def get_device_id(self):
-        """
-        Retrieves the device id and prints it to the screen from the 
-        currently stored id.
-        """
-        self.add_str_to_win(self.mail_win, self.device_id, 4, self.col_yxsize['Date'])
-        
     def get_line_count(self, mail):
         """
         """  
@@ -228,19 +222,21 @@ class Menu(object):
     def send_message(self):
         """
         """
+        
+        send_screen = curses.newwin(40, 40, 2, 35)
 
-        num_window = curses.newwin(1, 16, 8, 5)
-        text_window = curses.newwin(4, 40, 10, 5)
-
-        self.mail_win.addstr(1, 0, "Enter Phone Number",
-                   curses.color_pair(random.randint(2, 7)))
-        self.mail_win.addstr(3, 0, "Enter Message",
-                   curses.color_pair(random.randint(2, 7)))
-
-        self.mail_win.refresh()
+        num_window = curses.newwin(1, 16, 2, 35)
+        text_window = curses.newwin(4, 40, 4, 35)
 
         num_tb = curses.textpad.Textbox(num_window, insert_mode = True)
         body_tb = curses.textpad.Textbox(text_window, insert_mode = True)
+
+        self.window.addstr(1, 35, "Enter Phone Number",
+                   curses.color_pair(random.randint(2, 7)))
+        self.window.addstr(3, 35, "Enter Message",
+                   curses.color_pair(random.randint(2, 7)))
+
+        self.window.refresh()
 
         phone_num_text = num_tb.edit()
         body_text = body_tb.edit()
@@ -249,13 +245,15 @@ class Menu(object):
         for i in range(40, len(body_text), 40):
             body_text = body_text[0:i] + '' + body_text[i+1:]
         
-        self.mail_win.clear()
-        self.add_str_to_win(self.mail_win, body_text, 2, [3, 0, 80])
-
-        self.mail_win.refresh()
+        self.add_str_to_win(self.window, body_text, 2, [3, 40, 40])
 
         json_num_body_str = json.dumps({"PhoneNumber": phone_num_text, "Body": body_text})
+
         encrypted_str = base64.b64encode(self.crypt_keeper.encrypt(json_num_body_str))
+
+
+        self.add_str_to_win(self.window, "                                                                                                                                                                                                                                                                                                                                                                                              ", 0, [0, 35, 45])
+
         try:        
             self.sock.sendall(str(len(encrypted_str)).zfill(8) + encrypted_str)
 
@@ -263,21 +261,6 @@ class Menu(object):
             print ":(" + message
 
         return phone_num_text
-
-    def set_device_id(self):
-        """
-        Sets up the menu item that allows the user to input the device id of the 
-        phone they're connecting.
-        """
-        device_window = curses.newwin(1, 37, 8, 5)
-        device_tb = curses.textpad.Textbox(device_window, insert_mode = True)
-        device_id_text = device_tb.edit()
-        
-        self.device_id = device_id_text[:len(device_id_text) - 1]
-
-        self.crypt_keeper = cryptkeeper.security_setup(self.device_id)
-        self.sockthr.set_crypt(self.crypt_keeper)
-        self.sockthr.start()
         
     def set_mail_lines(self, mail_box):
         total_lines = 0
@@ -294,10 +277,19 @@ class Menu(object):
                 total_lines += num_lines
                 self.mail_boxes['Inbox']['Size'] = total_lines
 
-    def set_sock_thread(self, sockthr):
+    def start_thread(self, sockthr):
         """
         """
         self.sockthr = sockthr
+        
+        with open('test.txt', 'w') as f:
+            f.write(self.password)
+
+        print self.password
+
+        self.crypt_keeper = cryptkeeper.security_setup(self.password)#self.password)
+        self.sockthr.set_crypt(self.crypt_keeper)
+        self.sockthr.start()
         
     def set_up_col_names(self):
         """
@@ -338,8 +330,7 @@ class Menu(object):
         """
         self.panel.top()                                                     
         self.panel.show()                                                    
-        self.window.clear()                                                  
-        
+        self.window.clear()                                          
         while 1:
             self.window.refresh()
             curses.doupdate()
@@ -367,7 +358,7 @@ class Menu(object):
             elif key == ord('s'):#curses.KEY_DOWN:
                 self.navigate(1)
             elif key == curses.KEY_RESIZE:
-                self.on_resize()
+                pass#                self.on_resize()
             elif key == curses.KEY_NPAGE:
                 self.on_next()
             elif key == curses.KEY_PPAGE:

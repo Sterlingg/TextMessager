@@ -19,7 +19,7 @@ public class SMSSender {
 			String messageBody = message.getString("Body");
 			smsManager.sendTextMessage(phoneNumber, null, messageBody, null, null);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
+			// TODO Auto-generated catch blocks
 			e.printStackTrace();
 		}			
 	}

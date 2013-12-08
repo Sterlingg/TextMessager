@@ -30,21 +30,15 @@ public class DebugActivity extends Activity {
         String toSend = Packetizer.packetize(messages);
  
         NetInfo.setIp("10.0.2.2");
-        
 
-        Thread thr = new Thread(new SockReceiveThread());
-        thr.start();
-        
         (new SendTask()).execute(toSend
         		,NetInfo.getIp()
-        		,String.valueOf(NetInfo.getPort())); 
-        
-        TextView tv = (TextView)findViewById(R.id.android_id);        
-    }
+        		,String.valueOf(NetInfo.getPort()));    
+	}
 	
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        // Inflate the menu; this adds items to the action bar if it is present
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }

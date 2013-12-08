@@ -8,33 +8,14 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".DebugActivity" >
 
-    <EditText
-        android:id="@+id/ip_field1"
+    <TextView
+        android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="36dp"
-        android:ems="10" >
-
-    </EditText>
-
-    <Button
-        android:id="@+id/send_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/ip_field1"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="50dp"
-        android:text="@string/send_btn_string" />
-
-    <TextView
-        android:id="@+id/android_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="Medium Text"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:layout_marginTop="175dp"
+        android:text="Ready to send and receive!"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </RelativeLayout>

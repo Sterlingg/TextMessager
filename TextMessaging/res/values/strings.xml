@@ -6,5 +6,8 @@
     <string name="hello_world">Hello world!</string>
     <string name="send_btn_string">Send Inbox</string>
     <string name="title_activity_security_init">SecurityInitActivity</string>
+    <string name="title_activity_step1">MainActivity</string>
+    <string name="title_activity_step2">MainActivity</string>
+    <string name="title_activity_step3">MainActivity</string>
 
 </resources>
