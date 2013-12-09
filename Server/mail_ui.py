@@ -15,7 +15,7 @@ class Screens(object):
 
     def __init__(self):
         self.password = ""
-
+        self.ip = ""
         # curses.curs_set(0)
         # curses.cbreak()
         # curses.noecho()
@@ -32,7 +32,7 @@ class Screens(object):
         sock.listen(5)
         data_lock = threading.Lock()
 
-        main_menu = menu.Menu(stdscreen, self.password)
+        main_menu = menu.Menu(stdscreen, self.ip, self.password)
 
         sockThread = sockthr.socketThread(main_menu, sock, data_lock)
 
@@ -45,8 +45,38 @@ class Screens(object):
         sock.shutdown(socket.SHUT_RDWR)
         sock.close()
         sockThread.join()
+
+    def ip_screen(self, screen):
+        """
+        The screen where the user enters their password.
+        Arguments:
+        - `self`:
+        - `screen`:
+        """
+        max_y, max_x = screen.getmaxyx()
+
+        ip_screen_y_off = 3
+        ip_screen_x_off = 10
         
-    def splash(self, screen):
+        ip_text_y_off = 0
+        ip_text_x_off = 3
+        
+        ip_win = screen.subwin(5, 25,(max_y/2) - ip_screen_y_off, (max_x/2) - ip_screen_x_off)
+        ip_win.box()
+        ip_win.addstr(1, 2, "Please enter ip.")
+        
+        ip_box = screen.subwin(1, 16,(max_y/2) - ip_text_y_off, (max_x/2) - ip_text_x_off)
+        
+        #    ip_box.box()
+        screen.refresh()
+        tb = curses.textpad.Textbox(ip_box)
+        
+        ip_text = tb.edit()
+
+        self.ip = ip_text[:len(ip_text) - 1]
+        screen.clear()
+        
+    def pw_screen(self, screen):
         """
         The screen where the user enters their password.
         Arguments:
@@ -69,6 +99,7 @@ class Screens(object):
         
         #    pass_box.box()
         screen.refresh()
+        pass_win.refresh()
         tb = curses.textpad.Textbox(pass_box)
         
         pass_text = tb.edit()
@@ -79,6 +110,6 @@ class Screens(object):
 if __name__ == '__main__':
     screens = Screens()
     
-    curses.wrapper(screens.splash)
-    print screens.password
+    curses.wrapper(screens.ip_screen)
+    curses.wrapper(screens.pw_screen)
     curses.wrapper(screens.main_menu)

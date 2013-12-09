@@ -27,7 +27,8 @@ class CryptKeeper(object):
         hard_key = '768EE18AB6480D53CC8FFCD23D117D57'
         gen_key = pbkdf2.pbkdf2_hex(self.password, self.salt, 1024, 16)
         obj = AES.new(self.key, AES.MODE_CBC,IV = self.iv)
-        return obj.decrypt(to_decrypt)
+
+        return obj.decrypt(to_decrypt).rstrip(chr(0))
 
         #encrypt: Encrypts a string with 128 bit AES-CBC.
     def encrypt(self, to_encrypt):

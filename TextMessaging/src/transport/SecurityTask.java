@@ -55,7 +55,7 @@ public class SecurityTask extends AsyncTask<Void, Void, Void> {
 		try {
 			CryptKeeper ck = CryptKeeper.getInstance();
 			
-			Socket sock = new Socket("10.0.2.2", 9006);
+			Socket sock = new Socket(NetInfo.getIp(), 9006);
 
 			OutputStream os = sock.getOutputStream();
 			

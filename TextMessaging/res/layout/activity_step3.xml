@@ -9,7 +9,7 @@
     tools:context=".Step3Activity" >
 
     <TextView
-        android:id="@+id/s3_instruction"
+        android:id="@+id/s1_instruction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -19,7 +19,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <Button
-        android:id="@+id/s3_next_button"
+        android:id="@+id/s1_next_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

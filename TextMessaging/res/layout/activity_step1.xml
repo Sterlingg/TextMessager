@@ -9,23 +9,34 @@
     tools:context=".Step1Activity" >
 
     <TextView
-        android:id="@+id/s3_instruction"
+        android:id="@+id/s1_instruction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="44dp"
-        android:text="STEP 1: Launch Python App"
+        android:text="STEP 1: Launch Python App and enter device IP in box below."
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <Button
-        android:id="@+id/s3_next_button"
+        android:id="@+id/s1_next_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="148dp"
+        android:layout_marginBottom="93dp"
         android:onClick="startStep2"
         android:text="Next" />
+
+    <EditText
+        android:id="@+id/ip_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:ems="10" >
+
+        <requestFocus />
+    </EditText>
 
 </RelativeLayout>

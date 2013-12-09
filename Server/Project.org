@@ -1,4 +1,5 @@
-* TODO TODO List! [16%]
+* TODO TODO List! [14%]
+** TODO IP Address Input Screens
 ** TODO GUI Stuff
 *** TODO Move sending screen to top right.
 *** TODO Remove colours. 

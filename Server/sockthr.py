@@ -64,9 +64,9 @@ class socketThread (threading.Thread):
                     total_received += len(received)
 
                 packet_length = int(result[0:PACKET_HEADER_LEN])
-
+                total_received = 0
                 # Receive the entire packet.
-                while (total_received - PACKET_HEADER_LEN) < packet_length:
+                while total_received < packet_length:
                     received = self.conn[0].recv(1024)
                     if not received: break
                     total_received += len(received)

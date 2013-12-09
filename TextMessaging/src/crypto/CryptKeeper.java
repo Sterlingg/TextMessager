@@ -7,7 +7,6 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
-import java.util.UUID;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -18,9 +17,6 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import android.app.Activity;
-import android.content.Context;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 public class CryptKeeper {
@@ -28,7 +24,6 @@ public class CryptKeeper {
         private static CryptKeeper instance = null;
         
         private static SecureRandom random = new SecureRandom();
-                       
         private static final int PASSWORD_LENGTH = 8;        
         private static String password = "";
         
@@ -44,7 +39,7 @@ public class CryptKeeper {
         
 		private static final String ENCRYPTION_ALG = "AES";
 		private static final String ENCRYPTION_MODE = "CBC";
-		private static final String PADDING = "NoPadding";
+		private static final String PADDING = "ZeroBytePadding";
 		
         private CryptKeeper() {
          	
@@ -134,8 +129,9 @@ public class CryptKeeper {
 			return encrypted;
 		}
 
+        // TODO: EDITING THIS NOW !!!
 		public byte[] encrypt(String s){
-			return encrypt(padString(s).getBytes());
+			return encrypt(s.getBytes());
 		}
 
 		public byte[] gen8ByteSalt(){
@@ -190,12 +186,14 @@ public class CryptKeeper {
 			char PAD_VALUE = ' ';            		
 		    int padSize = BLOCK_SIZE - (s.length() % BLOCK_SIZE);		
 		    
+		    Log.i("CryptKeeper", "String encryption length: " + s.length());
 		    String padString = "";
 		    
 		    for (int i = 0; i < padSize; i++){
 		    	padString = padString + PAD_VALUE;
 		    }
-		                           	
+		    
+		    Log.i("CryptKeeper", "Padded length: " + (s + padString).length());           	
 			return s + padString;
 		}
 

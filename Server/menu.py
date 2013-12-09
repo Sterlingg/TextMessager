@@ -2,26 +2,28 @@ import curses
 import datetime
 import json
 import locale
-import math
 import random
 import socket
-import sys
 import base64
 
 import cryptkeeper
 
 from curses import panel, textpad
 
-# Menu: Base class for all menus in the UI.
 class Menu(object):
 
-    def __init__(self, stdscreen, password):
+    def __init__(self, stdscreen, ip, password):
         """
-        stdscreen is the default screen.
+        Arguments:
+        - `self`:
+        - `stdscreen`:
+        - `ip`:
+        - `password`:
         """
         self.MAX_YX = stdscreen.getmaxyx()
 
         self.stdscreen = stdscreen
+        self.ip = ip
         self.password = password
         self.window = stdscreen.subwin(0, 0)
 
@@ -58,7 +60,8 @@ class Menu(object):
 
         self.items = [
             ('Inbox', lambda: self.get_messages(self.mail_boxes['Inbox'])),
-            ('Received', lambda: self.get_messages(self.mail_boxes['Received'])),
+            ('Received', lambda: self.get_messages(
+                self.mail_boxes['Received'])),
             ('Send Message', lambda: self.send_message()),
             ('Connect', lambda: self.connect_phone()),
             ('Randomize BG!', self.randomize_bg)
@@ -80,19 +83,21 @@ class Menu(object):
         maximum length of each line of text in this window.
         """
         i = start_line
-        code = locale.getpreferredencoding()
 
         while len(s_to_add) > 0:
             # Check that we aren't outside of the viewable region.
             if i < (self.MAX_YX[0] - y_x_sz[0]):
-                # String smaller than the current line, so add it to the current line and
-                # then we're finished, so break from the loop.
+                # String smaller than the current line, so add it to
+                # the current line and then we're finished, so
+                # break from the loop.
                 if len(s_to_add) < y_x_sz[2]:
-                    win.addstr(i, y_x_sz[1], s_to_add,
+                    win.addstr(i, y_x_sz[1], s_to_add.encode("UTF-8"),
                                curses.color_pair(random.randint(2, 7)))
                     break
                 else:
-                    win.addstr(i, y_x_sz[1], s_to_add[0:y_x_sz[2] - 1], curses.color_pair(random.randint(2, 7)))
+                    win.addstr(i, y_x_sz[1], 
+                               s_to_add[0:y_x_sz[2] - 1].encode("UTF-8"),
+                               curses.color_pair(random.randint(2, 7)))
                     s_to_add = s_to_add[y_x_sz[2] - 1:]
                     i += 1
             else:
@@ -104,7 +109,7 @@ class Menu(object):
         Initiates a socket connection to the phone.
         """
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect(('localhost', 5051))
+        self.sock.connect((self.ip, 9004))
 
     def count_lines(self, s, y_x_sz):
         """
@@ -126,6 +131,10 @@ class Menu(object):
     #                     it off to the appropriate mail box.
     # TODO: YIKES !!
     def direct_to_mail_box(self,messages):
+
+        with open('test_decryption.txt', 'w') as f:
+            f.write(messages)
+
         jsonMessages = json.loads(messages)
         try:
             self.mail_boxes['Inbox']['Content'] = jsonMessages['Inbox']
@@ -295,9 +304,9 @@ class Menu(object):
         """
         """
         COL_NAME_START_Y = 4
-        self.add_str_to_win(self.mail_win, 'DATE', COL_NAME_START_Y, self.col_yxsize['Date'])
-        self.add_str_to_win(self.mail_win, 'FROM', COL_NAME_START_Y, self.col_yxsize['Address'])
-        self.add_str_to_win(self.mail_win, 'THE BAWDDDYY LOOOoooK', COL_NAME_START_Y, self.col_yxsize['Body'])
+        self.add_str_to_win(self.mail_win, 'Date', COL_NAME_START_Y, self.col_yxsize['Date'])
+        self.add_str_to_win(self.mail_win, 'From', COL_NAME_START_Y, self.col_yxsize['Address'])
+        self.add_str_to_win(self.mail_win, 'Body', COL_NAME_START_Y, self.col_yxsize['Body'])
 
     def set_col_sizes(self, date_size, addr_size):
         """
