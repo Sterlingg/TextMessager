@@ -39,7 +39,7 @@ class Screens(object):
         locale.setlocale(locale.LC_ALL,"")
         
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind(('0.0.0.0', 9001))
+        sock.bind(('0.0.0.0', 9002))
         sock.listen(5)
         conn = sock.accept()
 

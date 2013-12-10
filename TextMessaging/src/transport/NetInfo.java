@@ -7,7 +7,7 @@ package transport;
 public class NetInfo {
 
 	private static String ip = "10.0.2.2";
-	private static int port = 9001;
+	private static int port = 9002;
 	
 	/**
 	 * @return the ip.

@@ -1,5 +1,6 @@
 """
 menu.py
+        TODO: Move mail box handling to a seperate object.
 """
 
 import curses
@@ -38,9 +39,11 @@ class Menu(object):
         self.mail_boxes = {'Inbox': None,
                            'Received': None}
 
+        self.start_lines = {'Inbox' : 0, 'Received' : 0}
         self.curr_mail_box = None
-        self.curr_page_range = None
-        self.mail_on_page_range = {'Inbox': {0, 0}, 'Received': {0, 0}}
+        self.num_mail_on_page = {'Inbox': 0, 'Received': 0}
+        self.prev_num_mail_on_page = {'Inbox': 0, 'Received': 0}
+
         self.col_y_x_sz = {'Date': [0, 0, 0], 
                            'Address': [0, 0, 0],
                            'Body': [0, 0, 0]}
@@ -173,75 +176,34 @@ class Menu(object):
                 break
         return i - start_line
 
-    def num_mail_per_page(self, mail_box, forward):
-        """
-        Checks how many mail items will fit on a page. Iterates through the mail box in
-        reverse order if forward = False, else iterates through the mail forwards.
-        
-        Arguments
-        `mail_box`: The mail box being checked.
-        `forward`: Whether we iterate through the mail box from front to back
-        or back to front.
-        """
-        num_mail = 0
-        spliced_box = None
-        iteration_direction = lambda a: a
-
-        if forward == True:
-            spliced_box = mail_box[self.mail_on_page_range[1]:]
-
-        else:
-            spliced_box = mail_box[:self.mail_on_page_range[0]]
-            iteration_direction = reversed
-
-        iterator = iteration_direction(spliced_box)
-
-        for mail in iterator:
-            date_num_lines = self.num_lines_for_str(
-                self.format_timestamp(
-                    mail['date']),
-                line_num, 
-                self.col_y_x_sz['Date'])
-                
-            addr_num_lines = self.num_lines_for_str(
-                mail['address'], 
-                line_num, 
-                self.col_y_x_sz['Address'])
-            
-            body_num_lines = self.num_lines_for_str(
-                mail['body'],
-                line_num,
-                self.col_y_x_sz['Body'])
-            
-            line_length = (max(date_num_lines, addr_num_lines,
-                               body_num_lines) + 1)
-            if line_length == 0:
-                break
-            else:
-                num_mail += 1
-
-        return num_mail
-
     def scroll_down(self):
         """
         "Scrolls" the screen downwards by moving the starting line of the mail
         box down by the number of rows in the mail box.
         """
-        self.mail_on_page_range[0] = self.mail_on_page_range[1]
-        self.update_mail_box(self.mail_boxes[self.curr_mail_box]
-                             , self.curr_mail_box)
+        if(self.mail_boxes[self.curr_mail_box] != None):
+            incremented_mail_start_line = self.start_lines[self.curr_mail_box] + self.num_mail_on_page[self.curr_mail_box]
+            if (incremented_mail_start_line < len(self.mail_boxes[self.curr_mail_box])):
+                self.start_lines[self.curr_mail_box] += self.num_mail_on_page[self.curr_mail_box]
+
+            self.update_mail_box(self.mail_boxes[self.curr_mail_box]
+                                 , self.curr_mail_box)
 
     def scroll_up(self):
         """
         "Scrolls" the screen upwards by moving the starting line of the mail
         box up by the number of rows in the mail box.
         """
-        self.mail_on_page_range[0] = self.mail_on_page_range[1]
-        self.mail_on_page_range[1] = self.mail_on_page_range[0] - self.num_mail_per_page(self.mail_boxes[self.curr_mail_box], False)
+        if(self.mail_boxes[self.curr_mail_box] != None):
+            decremented_mail_start_line = self.start_lines[self.curr_mail_box] - self.num_mail_on_page[self.curr_mail_box]
+            if (decremented_mail_start_line < 0):
+                self.start_lines[self.curr_mail_box] = 0
+            else:
+                self.start_lines[self.curr_mail_box] -= self.prev_num_mail_on_page[self.curr_mail_box]
 
-        self.update_mail_box(self.mail_boxes[self.curr_mail_box]
-                             , self.curr_mail_box)
-
+                self.update_mail_box(self.mail_boxes[self.curr_mail_box]
+                                     , self.curr_mail_box)
+    
     def parse_mail_box(self, mail_box):
         """
         Displays the mail in the mail_box to the screen starting from
@@ -253,10 +215,12 @@ class Menu(object):
         self.mail_win.clear()
         self.set_up_col_names()
         line_num = 5
-        num_mail_on_page = 0
-        
+        mail_per_page = 0
+        self.prev_num_mail_on_page[self.curr_mail_box] = self.num_mail_on_page[self.curr_mail_box]
+        win_height = self.col_y_x_sz['Date'][2]
+    
         if mail_box != None:
-            for mail in mail_box[self.curr_page_range[0]:]:
+            for mail in mail_box[self.start_lines[self.curr_mail_box]:]:
                 date_num_lines = self.str_to_win(self.mail_win, 
                                                  self.format_timestamp(
                                                      mail['date']),
@@ -272,21 +236,18 @@ class Menu(object):
                                                  mail['body'],
                                                  line_num,
                                                  self.col_y_x_sz['Body'])
-                
+
                 line_length = (max(date_num_lines, addr_num_lines,
                                    body_num_lines) + 1)
                 line_num += line_length
-
-                if line_length == 0:
+                mail_per_page += 1
+                if line_num > win_height:
                     break
-                else:
-                    num_mail_on_page += 1
-
-            self.page_range[1] = self.curr_page_range[0] + num_mail_on_page
         else:
             self.str_to_win(self.mail_win, 'No messages.', line_num,
                             self.col_y_x_sz['Date'])
 
+        self.num_mail_on_page[self.curr_mail_box] = mail_per_page
         self.mail_win.refresh()
 
     def send_message(self):
@@ -406,5 +367,4 @@ class Menu(object):
         the body of the text message.
         """
         self.curr_mail_box = box_name
-        self.curr_mail_range = self.mail_on_page_range[box_name]
         self.parse_mail_box(mail_box)
