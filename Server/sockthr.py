@@ -1,86 +1,63 @@
+"""
+sockthr.py
+"""
+
 import base64
 import threading
 import socket
-import sys
-import json
-
-# socketThread: Class representing the socket running in the background receiving
-#               from the phone client. Passing data to the Menu class as it becomes
-#               available.
 
 PACKET_HEADER_LEN = 8
-class socketThread (threading.Thread):
-    def __init__(self, menu, sock, data_lock):
+class SocketThread (threading.Thread):
+    """
+    The thread which the client receives on. Passing data to the Menu class as it becomes
+    available.
+    """
+    def __init__(self, menu, sock):
         self.sock = sock
-        self.conn = None
-        self.data_lock = data_lock
         threading.Thread.__init__(self)
         self.menu = menu
         self.crypt_keeper = None
 
-    # close_socket: Checks whether a connection has been opened, and closes it if it has.
-    def close_socket(self):
-        if self.sock != None:
-            self.sock.close()
-        if self.conn[0] != None:
-            self.conn[0].close()
-
-    def get_curr_sock(self):
-        """
-        """
-        return self.sock
-
-    # new_socket: Accepts a new client connection. If the socket is shutdown while accepting
-    #             the socket will error and we clean up the socket and stop the thread.
-    def new_socket(self):
-        try:
-            self.conn = self.sock.accept()
-            return True
-
-        except socket.error, (code,message):
-            return False
-
-    # run: The main socket loop. Receives packets of Unicode text starting with
-    #      the size of the packet as a 4 byte integer. Followed by a JSON string
-    #      with { (Mail box name): [Array of mail messages with parameters (address, body, date)]}
     def run(self): 
-        # Accept connections indefinately until the UI is closed.
+        """
+        The main socket loop. Receives packets of Unicode text starting with
+        the size of the packet as a 4 byte integer. Followed by a JSON string
+        with { (Mail box name): 
+        [Array of mail messages with parameters (address, body, date)]}"""
         try:
             while 1:
-                # If UI closes thread while blocking for accept.
-                if self.new_socket() != True:
-                    self.close_socket()
-                    return
-                
                 # Get the length of the packet.
                 total_received = 0
                 result = ""
                 
                 while total_received < PACKET_HEADER_LEN:
-                    received = self.conn[0].recv(1024)
+                    received = self.sock.recv(1024)
                     if not received: 
                         break
+
                     result += received
                     total_received += len(received)
 
-                packet_length = int(result[0:PACKET_HEADER_LEN])
-                total_received = 0
+                packet_length = int(result[0:PACKET_HEADER_LEN]) + PACKET_HEADER_LEN
+                    
                 # Receive the entire packet.
                 while total_received < packet_length:
-                    received = self.conn[0].recv(1024)
-                    if not received: break
+                    received = self.sock.recv(1024)
+                    if not received: 
+                        break
                     total_received += len(received)
                     result += received
 
-                # Whole packet has been received at this point, so do something with it!
                 self.menu.direct_to_mail_box(
-                    self.crypt_keeper.decrypt(base64.b64decode(result[PACKET_HEADER_LEN:])))
+                    self.crypt_keeper.decrypt
+                    (base64.b64decode(result[PACKET_HEADER_LEN:])))
 
-        except socket.error, (socde,message):
-            self.close_socket()
+        except socket.error:
+            self.sock.close()
             return
 
     def set_crypt(self, crypt_keeper):
         """
+        Sets the crypto handler for this thread.
         """
         self.crypt_keeper = crypt_keeper

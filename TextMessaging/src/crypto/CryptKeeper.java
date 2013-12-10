@@ -25,7 +25,7 @@ public class CryptKeeper {
         
         private static SecureRandom random = new SecureRandom();
         private static final int PASSWORD_LENGTH = 8;        
-        private static String password = "";
+        private String password = "";
         
 		private Cipher aesCipher;
         private SecretKeySpec aesKeySpec;
@@ -42,14 +42,14 @@ public class CryptKeeper {
 		private static final String PADDING = "ZeroBytePadding";
 		
         private CryptKeeper() {
-         	
+         		this.password = randomPassword();
         		pbkdf2Gen(this.password.toCharArray());
         		
         		System.out.println("Password:" + password);
         		
         		System.out.println("Key: " + 
         		Arrays.toString(aesKeySpec.getEncoded()));
-        		//"C111510372A7A003".getBytes().111
+        
     			aesIv = new IvParameterSpec(gen16ByteSalt());
         		        
         		try {
@@ -59,7 +59,7 @@ public class CryptKeeper {
 	        		aesCipher.init(Cipher.ENCRYPT_MODE, aesKeySpec,
 	        				aesIv);
 				} catch (NoSuchAlgorithmException e) {
-					// TODO Auto-generated catch block1
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (NoSuchPaddingException e) {
 					// TODO Auto-generated catch block
@@ -129,7 +129,6 @@ public class CryptKeeper {
 			return encrypted;
 		}
 
-        // TODO: EDITING THIS NOW !!!
 		public byte[] encrypt(String s){
 			return encrypt(s.getBytes());
 		}
@@ -154,11 +153,16 @@ public class CryptKeeper {
 			return this.device_id;
 		}
 
-		public byte[] get_iv(){			
+		public byte[] getIV(){			
 			return aesIv.getIV();
 		}
 
-		public byte[] get_salt(){			
+		public CharSequence getPassword() {
+			// TODO Auto-generated method stub
+			return this.password;
+		}
+
+		public byte[] getSalt(){			
 			return kdf_salt;
 		}
 		
@@ -225,7 +229,7 @@ public class CryptKeeper {
 		 * Returns a random string of the desired length specified in the length argument. As well as
 		 * sets the password to use for encryption.
 		 */
-		public static String randomPassword(){
+		public String randomPassword(){
 		password = randomString(PASSWORD_LENGTH);	
 		
 		return password;
@@ -234,7 +238,7 @@ public class CryptKeeper {
         /**
 		 * Returns a random string of the desired length specified in the length argument.
 		 */
-		public static String randomString(int length){			
+		public String randomString(int length){			
 		return (new BigInteger(length*5, random)).toString(32);
 		}
 }

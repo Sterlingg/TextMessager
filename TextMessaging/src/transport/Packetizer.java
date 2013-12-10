@@ -78,6 +78,6 @@ public class Packetizer {
 				e.printStackTrace();
 				throw new RuntimeException(e);
 			}	            
-	        return jsonWrapper.toString();
+	        return packetize(jsonWrapper.toString());
 	}
 }

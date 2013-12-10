@@ -1,6 +1,5 @@
 package com.globex.textmessaging.Activities;
 
-import transport.SecurityTask;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,11 +17,8 @@ public class Step2Activity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_step2);
-		
-		TextView passwordText = (TextView)this.findViewById(R.id.s2_password);
-		
-		passwordText.setText(CryptKeeper.randomPassword());
-		
+		TextView passwordText = (TextView)this.findViewById(R.id.s2_password);		
+		passwordText.setText(CryptKeeper.getInstance().getPassword());		
 	}
 
 	@Override
@@ -34,7 +30,7 @@ public class Step2Activity extends Activity {
 
 	public void startStep3(View v){ 		
 		Intent intent = new Intent(this, 
-				Step3Activity.class);
+				DebugActivity.class);
 		
 		this.startActivity(intent);
 	}

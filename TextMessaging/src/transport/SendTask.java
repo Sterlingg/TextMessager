@@ -1,14 +1,5 @@
 package transport;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.Socket;
-import java.net.UnknownHostException;
-
-import crypto.CryptKeeper;
-
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -18,6 +9,8 @@ import android.util.Log;
  */
 public class SendTask extends AsyncTask<String, Void, Void>{
 
+	private SocketHandler sockHandler;
+
 	@Override
     protected void onPostExecute(Void result) {
         super.onPostExecute(result);
@@ -26,27 +19,11 @@ public class SendTask extends AsyncTask<String, Void, Void>{
 	@Override
 	protected Void doInBackground(String... params) {
 	    
-        try {
-			Socket sock = new Socket(params[1],Integer.parseInt(params[2]));
+			this.sockHandler = SocketHandler.getInstance();
 			
-			OutputStream os = sock.getOutputStream();
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(os));
-            
-            Log.i("ConnectionTask", "Sending!" + Packetizer.packetize(params[0]));
-            out.write(Packetizer.packetize(params[0]));
-            
-            out.flush();
-            
-            sock.close();
-            
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	
+            Log.i("ConnectionTask", "Sending!" + params[0]);
+            this.sockHandler.send(params[0]);
+	
 		return null;
 	}
 }
