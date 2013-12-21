@@ -1,4 +1,4 @@
-package transport;
+package com.globex.textmessaging.transport;
 
 /**
  * @author sterling

@@ -1,4 +1,4 @@
-package transport;
+package com.globex.textmessaging.transport;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -21,7 +21,7 @@ public class SendTask extends AsyncTask<String, Void, Void>{
 	    
 			this.sockHandler = SocketHandler.getInstance();
 			
-            Log.i("ConnectionTask", "Sending!" + params[0]);
+            Log.i("SendTask", "Sending!" + params[0]);
             this.sockHandler.send(params[0]);
 	
 		return null;

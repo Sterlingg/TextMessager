@@ -1,6 +1,5 @@
 package com.globex.textmessaging.Activities;
 
-import transport.NetInfo;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +9,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.globex.textmessaging.R;
+import com.globex.textmessaging.transport.NetInfo;
 
 public class Step1Activity extends Activity {
 
@@ -33,6 +33,7 @@ public class Step1Activity extends Activity {
 		NetInfo.setIp(ipTextBox.getText().toString());
 		
 	    Intent intent = new Intent(this, Step2Activity.class);
-	    startActivity(intent);
+	    startActivity(intent);	    
+	    this.finish();
 	}
 }

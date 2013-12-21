@@ -8,8 +8,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.globex.textmessaging.R;
+import com.globex.textmessaging.crypto.CryptKeeper;
 
-import crypto.CryptKeeper;
 
 public class Step2Activity extends Activity {
 
@@ -17,8 +17,10 @@ public class Step2Activity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_step2);
-		TextView passwordText = (TextView)this.findViewById(R.id.s2_password);		
-		passwordText.setText(CryptKeeper.getInstance().getPassword());		
+		TextView passwordText = (TextView)this.findViewById(R.id.s2_password);	
+		CryptKeeper ck = CryptKeeper.getInstance();
+		ck.init();
+		passwordText.setText(ck.getPassword());		
 	}
 
 	@Override
@@ -33,5 +35,6 @@ public class Step2Activity extends Activity {
 				DebugActivity.class);
 		
 		this.startActivity(intent);
+	    this.finish();
 	}
 }

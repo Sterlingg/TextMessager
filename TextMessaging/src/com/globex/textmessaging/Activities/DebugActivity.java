@@ -1,11 +1,11 @@
 package com.globex.textmessaging.Activities;
 
-import transport.AcceptSockTask;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 
 import com.globex.textmessaging.R;
+import com.globex.textmessaging.transport.AcceptSockTask;
 
 /**
  * @author sterling

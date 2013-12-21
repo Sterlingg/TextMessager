@@ -39,6 +39,8 @@ class Screens(object):
         locale.setlocale(locale.LC_ALL,"")
         
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
         sock.bind(('0.0.0.0', 9002))
         sock.listen(5)
         conn = sock.accept()
@@ -113,7 +115,7 @@ class Screens(object):
                                     (max_x/2) - pass_screen_x_off)
         pass_win.box()
         pass_win.addstr(1, 2, "Please enter password")
-        
+
         pass_win = stdscreen.subwin(1,
                                     9,
                                     (max_y/2) - pass_text_y_off,
@@ -121,7 +123,7 @@ class Screens(object):
         stdscreen.refresh()
         pass_win.refresh()
         pass_box = curses.textpad.Textbox(pass_win)
-        
+
         pass_text = pass_box.edit()
 
         self.password = pass_text[:len(pass_text) - 1]

@@ -1,4 +1,4 @@
-package crypto;
+package com.globex.textmessaging.crypto;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -42,35 +42,7 @@ public class CryptKeeper {
 		private static final String PADDING = "ZeroBytePadding";
 		
         private CryptKeeper() {
-         		this.password = randomPassword();
-        		pbkdf2Gen(this.password.toCharArray());
-        		
-        		System.out.println("Password:" + password);
-        		
-        		System.out.println("Key: " + 
-        		Arrays.toString(aesKeySpec.getEncoded()));
-        
-    			aesIv = new IvParameterSpec(gen16ByteSalt());
-        		        
-        		try {
-					aesCipher = Cipher.getInstance(ENCRYPTION_ALG + "/" 
-								+ ENCRYPTION_MODE + "/"
-								+ PADDING);
-	        		aesCipher.init(Cipher.ENCRYPT_MODE, aesKeySpec,
-	        				aesIv);
-				} catch (NoSuchAlgorithmException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchPaddingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvalidKeyException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvalidAlgorithmParameterException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}          	                
+   	                
         }
              
     	final protected static char[] hexArray = "0123456789abcdef".toCharArray();
@@ -185,7 +157,39 @@ public class CryptKeeper {
 		    return data;
 		}
 		
-    	public static String padString(String s){
+    	public void init() {
+			this.password = randomPassword();
+			pbkdf2Gen(this.password.toCharArray());
+			
+			System.out.println("Password:" + password);
+			
+			System.out.println("Key: " + 
+			Arrays.toString(aesKeySpec.getEncoded()));
+		
+			aesIv = new IvParameterSpec(gen16ByteSalt());
+				        
+				try {
+					aesCipher = Cipher.getInstance(ENCRYPTION_ALG + "/" 
+								+ ENCRYPTION_MODE + "/"
+								+ PADDING);
+		    		aesCipher.init(Cipher.ENCRYPT_MODE, aesKeySpec,
+		    				aesIv);
+				} catch (NoSuchAlgorithmException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchPaddingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvalidKeyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvalidAlgorithmParameterException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}       			
+		}
+
+		public static String padString(String s){
 			int BLOCK_SIZE = 16;
 			char PAD_VALUE = ' ';            		
 		    int padSize = BLOCK_SIZE - (s.length() % BLOCK_SIZE);		

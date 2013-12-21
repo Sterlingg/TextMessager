@@ -1,7 +1,7 @@
 /**
  * 
  */
-package transport;
+package com.globex.textmessaging.transport;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,8 +11,8 @@ import android.util.Base64;
 
 import com.globex.textmessaging.SMS.SMSMessage;
 import com.globex.textmessaging.SMS.SMSType;
+import com.globex.textmessaging.crypto.CryptKeeper;
 
-import crypto.CryptKeeper;
 
 /**
  * 

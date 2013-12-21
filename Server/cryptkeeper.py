@@ -9,7 +9,7 @@ import pbkdf2
 class CryptKeeper(object):
     """
     Class for handling the crypto hand shake, and all further encrypting and 
-    decrypting transmitted and received data.
+    decrypting of transmitted and received data.
     """
     def __init__(self, password, sock, sockthr):
         """

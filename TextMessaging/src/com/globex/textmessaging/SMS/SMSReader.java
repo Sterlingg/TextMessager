@@ -15,7 +15,6 @@ public class SMSReader {
 
 	private static final Uri SMS_INBOX_URI = Uri.parse("content://sms/inbox");
 	
-	
 	//TODO: CLOSE CURSOR SOMEWHERE!
 	private Cursor inboxCursor = null;
 	private SMSMessage[] inboxMessages = null;

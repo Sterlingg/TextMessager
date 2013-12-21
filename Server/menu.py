@@ -36,13 +36,14 @@ class Menu(object):
         self.sockthr = None
         self.crypt_keeper = None
 
-        self.mail_boxes = {'Inbox': None,
-                           'Received': None}
+        self.mail_boxes = {'Inbox': [],
+                           'Received': []}
 
         self.start_lines = {'Inbox' : 0, 'Received' : 0}
         self.curr_mail_box = None
         self.num_mail_on_page = {'Inbox': 0, 'Received': 0}
         self.prev_num_mail_on_page = {'Inbox': 0, 'Received': 0}
+        self.is_end_of_box = False
 
         self.col_y_x_sz = {'Date': [0, 0, 0], 
                            'Address': [0, 0, 0],
@@ -56,7 +57,7 @@ class Menu(object):
             ('Inbox', lambda: self.update_mail_box(self.mail_boxes['Inbox'], 'Inbox')),
             ('Received', lambda: self.update_mail_box(
                 self.mail_boxes['Received'], 'Received')),
-            ('Send Message', self.send_message)
+            ('Send Message!', self.send_message)
             ]   
 
         self.items.append(('Exit', 'exit'))
@@ -70,18 +71,35 @@ class Menu(object):
         """
 
         json_messages = json.loads(messages)
+
         try:
             self.mail_boxes['Inbox'] = json_messages['Inbox']
         except:
             pass
         try:
-            self.mail_boxes['Outbox'] = json_messages['Outbox']
+            self.mail_boxes['Outbox'] += json_messages['Outbox']
         except:
             pass
         try:
-            self.mail_boxes['Received'] = json_messages['Received']
+            self.mail_boxes['Received'] = json_messages['Received'] + self.mail_boxes['Received']
+            self.mail_boxes['Inbox'] = json_messages['Received'] + self.mail_boxes['Inbox']
+            self.window.addstr(len(self.items) + 1, 1, "New Message!", curses.A_NORMAL) 
         except:
             pass
+
+    def display_items(self):
+        """
+        Writes the menu items to the screen.
+        """
+        for index, item in enumerate(self.items):
+            if index == self.menu_pos:
+                mode = curses.A_REVERSE
+            else:
+                mode = curses.A_NORMAL
+
+            msg = '%d. %s' % (index, item[0])
+            self.window.addstr(1+index, 1, msg, mode)
+            curses.doupdate()
 
     def display(self):
         """
@@ -93,17 +111,7 @@ class Menu(object):
         self.panel.show()                                                    
         self.window.clear()                                          
         while 1:
-            self.window.refresh()
-            curses.doupdate()
-            for index, item in enumerate(self.items):
-                if index == self.menu_pos:
-                    mode = curses.A_REVERSE
-                else:
-                    mode = curses.A_NORMAL
-
-                msg = '%d. %s' % (index, item[0])
-
-                self.window.addstr(1+index, 1, msg, mode)
+            self.display_items()
 
             key = self.window.getch()
 
@@ -128,7 +136,6 @@ class Menu(object):
         self.window.clear()                                                  
         self.panel.hide()
         panel.update_panels()
-        curses.doupdate()
 
     def format_timestamp(self, time_stamp):
         """
@@ -151,31 +158,6 @@ class Menu(object):
         elif self.menu_pos >= len(self.items):                               
             self.menu_pos = len(self.items)-1
 
-    def num_lines_for_str(self, s_to_add, start_line, y_x_sz):
-        """
-        Figures out how many lines a string will occupy. 
-        
-        Arguments
-        `s_to_add`: The string being added to this window.
-        `start_line`: The first line that the string is being written
-        to in this window.
-        `y_x_sz`: A tuple containing the top left corner y position of this 
-        window, the top left corner x position of this window, and the 
-        maximum length of each line of text in this window.
-        """
-        i = start_line
-
-        while len(s_to_add) > 0:
-            if i < (self.max_yx[0] - y_x_sz[0]):
-                if len(s_to_add) < y_x_sz[2]:
-                    break
-                else:
-                    s_to_add = s_to_add[y_x_sz[2] - 1:]
-                    i += 1
-            else:
-                break
-        return i - start_line
-
     def scroll_down(self):
         """
         "Scrolls" the screen downwards by moving the starting line of the mail
@@ -184,8 +166,10 @@ class Menu(object):
         if(self.mail_boxes[self.curr_mail_box] != None):
             incremented_mail_start_line = self.start_lines[self.curr_mail_box] + self.num_mail_on_page[self.curr_mail_box]
             if (incremented_mail_start_line < len(self.mail_boxes[self.curr_mail_box])):
+                self.prev_num_mail_on_page[self.curr_mail_box] = self.num_mail_on_page[self.curr_mail_box]
                 self.start_lines[self.curr_mail_box] += self.num_mail_on_page[self.curr_mail_box]
-
+            else:
+                self.is_end_of_box = True
             self.update_mail_box(self.mail_boxes[self.curr_mail_box]
                                  , self.curr_mail_box)
 
@@ -196,13 +180,13 @@ class Menu(object):
         """
         if(self.mail_boxes[self.curr_mail_box] != None):
             decremented_mail_start_line = self.start_lines[self.curr_mail_box] - self.num_mail_on_page[self.curr_mail_box]
-            if (decremented_mail_start_line < 0):
+            if (decremented_mail_start_line <= 0):
                 self.start_lines[self.curr_mail_box] = 0
             else:
                 self.start_lines[self.curr_mail_box] -= self.prev_num_mail_on_page[self.curr_mail_box]
 
-                self.update_mail_box(self.mail_boxes[self.curr_mail_box]
-                                     , self.curr_mail_box)
+            self.update_mail_box(self.mail_boxes[self.curr_mail_box]
+                                 , self.curr_mail_box)
     
     def parse_mail_box(self, mail_box):
         """
@@ -216,10 +200,10 @@ class Menu(object):
         self.set_up_col_names()
         line_num = 5
         mail_per_page = 0
-        self.prev_num_mail_on_page[self.curr_mail_box] = self.num_mail_on_page[self.curr_mail_box]
+
         win_height = self.col_y_x_sz['Date'][2]
     
-        if mail_box != None:
+        if mail_box:
             for mail in mail_box[self.start_lines[self.curr_mail_box]:]:
                 date_num_lines = self.str_to_win(self.mail_win, 
                                                  self.format_timestamp(
@@ -248,6 +232,8 @@ class Menu(object):
                             self.col_y_x_sz['Date'])
 
         self.num_mail_on_page[self.curr_mail_box] = mail_per_page
+        if not self.is_end_of_box:
+            self.prev_num_mail_on_page[self.curr_mail_box] = self.num_mail_on_page[self.curr_mail_box]
         self.mail_win.refresh()
 
     def send_message(self):
@@ -288,7 +274,7 @@ class Menu(object):
                         "".join([" " for x in range(clear_length)]),
                         0, [0, 35, 45])
 
-        try:        
+        try:
             self.sock.sendall(str(len(encrypted_str)).zfill(8) + encrypted_str)
 
         except socket.error, (socde, message):
@@ -366,5 +352,6 @@ class Menu(object):
         the message was sent, the address the text message was sent from, and
         the body of the text message.
         """
+        self.window.addstr(len(self.items) + 1, 1, "            ", curses.A_NORMAL) 
         self.curr_mail_box = box_name
         self.parse_mail_box(mail_box)

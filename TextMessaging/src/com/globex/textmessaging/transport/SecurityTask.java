@@ -1,26 +1,29 @@
-package transport;
+package com.globex.textmessaging.transport;
 
 import com.globex.textmessaging.SMS.SMSMessage;
 import com.globex.textmessaging.SMS.SMSReader;
+import com.globex.textmessaging.crypto.CryptKeeper;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
-import crypto.CryptKeeper;
 
-public class SecurityTask extends AsyncTask<Context, Void, Void> {
+public class SecurityTask extends AsyncTask<Void, Void, Void> {
 
 	private Context mainContext = null;
 	private SocketHandler sockHandler = null;
 	
+	public SecurityTask(Context mainContext){
+		super();
+		this.mainContext = mainContext; 
+	}
 	@Override
-	protected Void doInBackground(Context ... params) {
+	protected Void doInBackground(Void ... params) {
 		try {
 			this.sockHandler = SocketHandler.getInstance();
-			this.mainContext = params[0];
-			CryptKeeper ck = CryptKeeper.getInstance();
+			CryptKeeper ck = CryptKeeper.getInstance();			
 			
 			String salt = Base64.encodeToString(ck.getSalt(), Base64.DEFAULT);
 			this.sockHandler.sendWithLength(salt);
@@ -50,7 +53,7 @@ public class SecurityTask extends AsyncTask<Context, Void, Void> {
 		Toast.makeText(mainContext,"Connection established."
 				,Toast.LENGTH_LONG).show();		
 
-		Thread thr = new Thread(new SockReceiveThread());
+		Thread thr = new Thread(new SockReceiveThread(mainContext));
 		thr.start();
 		
         SMSMessage messages[] = (new SMSReader(mainContext)).getInboxMessages();

@@ -1,4 +1,4 @@
-package transport;
+package com.globex.textmessaging.transport;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -14,15 +14,15 @@ import android.util.Log;
 public class SocketHandler{
 	
 	private static SocketHandler instance = null;
-//	private Socket sock = null;
 	private InputStream is = null;
-	private OutputStream os = null;  
+	private OutputStream os = null;
+	private Socket sock = null;
 
 	public SocketHandler(Socket sock){
-	//	this.sock = sock;
 		try {
 			this.is = sock.getInputStream();
-			this.os = sock.getOutputStream();
+			this.os = sock.getOutputStream();		
+			this.sock = sock;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -31,21 +31,27 @@ public class SocketHandler{
 
 	public static SocketHandler getInstance() {
 		if( instance == null ){
-			throw new Error("Call init first.");
+			throw new Error("Call initSocket first.");
 		}
 		return instance;
 	}
 	
-	public static void init(Socket sock){
+	public static void initSocket(Socket sock) {
 		if( instance == null ){
-				instance = new SocketHandler(sock);
+			instance = new SocketHandler(sock);
 		}
 		else{
-			// TODO: Proper error handling here.
-			throw new Error();
+			try {
+				instance.is = sock.getInputStream();
+				instance.os = sock.getOutputStream();
+				instance.sock = sock;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}		
 		}
 	}
-	
+
 	public byte[] receive(){
 		DataInputStream dis = new DataInputStream(
 				is);
@@ -63,8 +69,6 @@ public class SocketHandler{
 			
 			return data;
 		} catch (IOException e) {
-			// TODO Auto-generated catch bl
-			e.printStackTrace();
 			return null;
 		}		
 	}
@@ -109,5 +113,12 @@ public class SocketHandler{
 	       }
 	}
 
-
+	public void closeSocket() {
+		try {
+			sock.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
 }

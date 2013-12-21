@@ -1,4 +1,4 @@
-package transport;
+package com.globex.textmessaging.transport;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -18,7 +18,7 @@ public class AcceptSockTask extends AsyncTask<Context, Void, Void> {
 		try {
 			sock = new Socket(NetInfo.getIp(), NetInfo.getPort());
 
-			SocketHandler.init(sock);
+			SocketHandler.initSocket(sock);
 			context = params[0];
 		} catch (NumberFormatException e) {
 			// TODO Auto-generated catch block
@@ -30,12 +30,11 @@ public class AcceptSockTask extends AsyncTask<Context, Void, Void> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 		return null;
 	}
 	
 	protected void onPostExecute(Void v){	
 		 assert(context instanceof Activity);
-		 (new SecurityTask()).execute(context);
+		 (new SecurityTask(context)).execute();
 	}
 }
