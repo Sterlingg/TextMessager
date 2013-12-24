@@ -17,12 +17,14 @@ public class SocketHandler{
 	private InputStream is = null;
 	private OutputStream os = null;
 	private Socket sock = null;
+	private static boolean sockOpen = false;
 
 	public SocketHandler(Socket sock){
 		try {
 			this.is = sock.getInputStream();
 			this.os = sock.getOutputStream();		
 			this.sock = sock;
+			sockOpen = true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -45,6 +47,7 @@ public class SocketHandler{
 				instance.is = sock.getInputStream();
 				instance.os = sock.getOutputStream();
 				instance.sock = sock;
+				sockOpen = true;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -116,9 +119,19 @@ public class SocketHandler{
 	public void closeSocket() {
 		try {
 			sock.close();
+			sockOpen = false;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+
+	public static boolean isConnected() {
+		if(sockOpen == true){
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 }

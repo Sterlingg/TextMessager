@@ -225,6 +225,12 @@ class Menu(object):
                                    body_num_lines) + 1)
                 line_num += line_length
                 mail_per_page += 1
+
+                if (self.start_lines[self.curr_mail_box] + mail_per_page) < len(mail_box):
+                    self.is_end_of_box = False
+                else:
+                    self.is_end_of_box = True
+
                 if line_num > win_height:
                     break
         else:

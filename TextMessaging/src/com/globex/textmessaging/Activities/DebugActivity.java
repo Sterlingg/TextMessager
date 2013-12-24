@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.Menu;
 
 import com.globex.textmessaging.R;
-import com.globex.textmessaging.transport.AcceptSockTask;
+import com.globex.textmessaging.transport.ConnectTask;
 
 /**
  * @author sterling
@@ -18,7 +18,7 @@ public class DebugActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
                
-        (new AcceptSockTask()).execute(this);
+        (new ConnectTask()).execute(this);
 	}
 	
     @Override

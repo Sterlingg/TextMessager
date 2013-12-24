@@ -25,7 +25,7 @@ public class Step2Activity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu;11 this adds items to th1e action bar if it is present.
+		// Inflate the menu;This adds items to th1e action bar if it is present.
 		getMenuInflater().inflate(R.menu.step2, menu);
 		return true;
 	}
