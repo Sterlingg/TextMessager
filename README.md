@@ -1,4 +1,4 @@
-TextMessager
+#TextMessager
 ============
 
 An interface for sending and receiving text messages from an Android phone on your computer. 
