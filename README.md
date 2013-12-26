@@ -1,5 +1,4 @@
 # TextMessager
-
 An interface for sending and receiving text messages from an Android phone on your computer. 
 ## Description
 This is a program for sending and receiving text messages from your computer. It is meant to provide a faster way of responding to text messages received on your phone.
