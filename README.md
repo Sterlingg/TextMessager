@@ -23,4 +23,4 @@ This is a program for sending and receiving text messages from your computer. It
 Use 'w' and 's' to select menu items on the computer's interface, and enter to select an item. Use 'n' and 'p' to scroll a mail box up and down. When sending a message use C-g to move between the phone number and body fields, and a final C-g to finish sending a message. 
 
 ## Installation Demo
-[source of this content](https://raw.github.com/Sterlingg/TextMessager/master/Demo/demo.gif)
+[Here's a short demo showing how to install the programs, and a quick usage demo at the end.](https://raw.github.com/Sterlingg/TextMessager/master/Demo/demo.gif)
