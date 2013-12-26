@@ -18,3 +18,9 @@ This is a program for sending and receiving text messages from your computer. It
 11. If it doesn't please give me information on the steps you took, and I'll try my best to fix it or troubleshoot your problem.
 
 \* Make sure the computer and device are on the same subnet, or else make sure that port 9002 is forwarded properly for both the Android device and the computer.
+
+## Usage
+Use 'w' and 's' to select menu items on the computer's interface, and enter to select an item. Use 'n' and 'p' to scroll a mail box up and down. When sending a message use C-g to move between the phone number and body fields, and a final C-g to finish sending a message. 
+
+## Installation Demo
+[source of this content](https://raw.github.com/Sterlingg/TextMessager/master/Demo/demo.gif)
